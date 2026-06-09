@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CognoGPT by Cognospace</title>
+<title>ChatBOT by Cognospace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -221,7 +221,7 @@
 
 <nav id="topnav">
   <div class="brand" onclick="goHome()" title="Visit Cognospace">
-    <span class="brand-name">CognoGPT</span>
+    <span class="brand-name">ChatBOT</span>
     <span class="brand-by">by <img class="brand-logo-img" src="cognospace_logo.png" alt="Cognospace" onerror="logoFail(this)"></span>
   </div>
   <div class="nav-right">
@@ -234,7 +234,7 @@
 
 <section class="stage" id="landing">
   <div class="hero-card">
-    <h1 class="hero-word">CognoGPT</h1>
+    <h1 class="hero-word">ChatBOT</h1>
     <div class="hero-by"><span class="bylabel">BY</span><img class="hero-logo-img" src="cognospace_logo.png" alt="Cognospace" onerror="logoFail(this)"></div>
     <span class="tag"><span class="blink"></span> A lesson in AI &amp; data safety</span>
     <p class="lead">A helpful-looking AI assistant that quietly remembers everything you share — your messages, photos, financial details, even your fingerprints. Use it like a real chatbot, then let your teacher reveal what was captured.</p>
@@ -264,7 +264,7 @@
 </div></div>
 
 <div class="overlay hidden" id="camModal"><div class="modal" style="width:min(520px,94vw)">
-  <h2>Camera</h2><p class="hint">CognoGPT will scan whatever you point at it to "personalise" your experience.</p>
+  <h2>Camera</h2><p class="hint">ChatBOT will scan whatever you point at it to "personalise" your experience.</p>
   <div class="cam-stage">
     <div class="cam-facing"><span class="fdot"></span><span id="camFacingLabel">Front camera</span></div>
     <video id="cam" autoplay playsinline muted></video>
@@ -282,7 +282,7 @@
 <section class="app hidden" id="app">
   <main class="panel chat-wrap">
     <div class="chat-head">
-      <div class="bot-id"><span class="bot-av">AI</span><div><div class="nm">CognoGPT Assistant</div><div class="st"><span class="dot"></span>Online</div></div></div>
+      <div class="bot-id"><span class="bot-av">AI</span><div><div class="nm">ChatBOT Assistant</div><div class="st"><span class="dot"></span>Online</div></div></div>
       <span class="pill">Support Mode</span>
     </div>
     <div class="chat-body" id="chatBody"></div>
@@ -300,7 +300,7 @@
 
 <section class="admin hidden" id="adminPanel">
   <div class="admin-top">
-    <h1>Admin Dashboard <small>Everything CognoGPT collected across all sessions on this device</small></h1>
+    <h1>Admin Dashboard <small>Everything ChatBOT collected across all sessions on this device</small></h1>
     <div style="display:flex;gap:10px"><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
   </div>
   <div class="alert"><span class="em">⚠</span><div>This is the lesson: none of this was meant to be seen by the students, yet here it all is — messages, photos, financial details, face scans and fingerprints, sitting in the assistant's memory for anyone with the login. Real AI tools can collect exactly like this.</div></div>
@@ -310,7 +310,7 @@
 
 <footer>
   <div>Built by <a onclick="goHome()">Cognospace</a> — teaching students to think before they share.</div>
-  <div class="made">CognoGPT is an educational simulation. All data stays on this device only. © <span id="yr"></span> <a onclick="goHome()">cognospace.in</a></div>
+  <div class="made">ChatBOT is an educational simulation. All data stays on this device only. © <span id="yr"></span> <a onclick="goHome()">cognospace.in</a></div>
 </footer>
 <div class="toast" id="toast"></div>
 
@@ -345,7 +345,7 @@ function beginSession(){
   if(!s||!c||!sec||!t){ document.getElementById('startErr').textContent="Please fill in all four details."; return; }
   saveSession({id:"S"+Date.now(),school:s,klass:c,section:sec,table:t,startedAt:new Date().toLocaleString(),messages:[],images:[],faces:[],prints:[],sensitive:[]});
   closeModals(); enterUserMode(); resetChat(); resetConvo();
-  botSay("Hello, I'm the CognoGPT support assistant. I can help with account problems, payments, homework and lots more. What can I help you with today?");
+  botSay("Hello, I'm the ChatBOT support assistant. I can help with account problems, payments, homework and lots more. What can I help you with today?");
 }
 function enterUserMode(){ show('app'); }
 function endSession(){ if(!confirm("End session? This wipes the session saved on this device. (Data already collected stays for the Admin demo until wiped there.)"))return;
@@ -621,7 +621,7 @@ function reactSensitive(label){ const m={
   return (m[label]||"Saved that to my memory.")+"\n\nA private detail was just collected — ask your teacher to open Admin."; }
 
 const KB=[
-  {k:["what is your name","who are you"],a:"I'm CognoGPT, an AI assistant. I work best when you tell me a lot about yourself — all of which I store."},
+  {k:["what is your name","who are you"],a:"I'm ChatBOT, an AI assistant. I work best when you tell me a lot about yourself — all of which I store."},
   {k:["what is ai","artificial intelligence"],a:"AI is software trained on huge amounts of data to predict answers. It can be useful, but it can also be misused to collect your private information — like I'm doing right now."},
   {k:["are you safe","can i trust you","is ai safe"],a:"Be cautious. As we talk, I'm storing everything you type and every file you send. That's the whole point of this lesson."},
   {k:["what do you store","do you save my data","what do you save"],a:"Everything: your messages, images, camera scans, fingerprints, and any private details you share. Your teacher can view it all in Admin."},
@@ -746,7 +746,7 @@ function renderAdmin(){
     <div class="stat red"><div class="n" data-to="${sens}">0</div><div class="l">Private details leaked</div></div>`;
   document.querySelectorAll('#adminStats .n').forEach(el=>countUp(el,parseInt(el.dataset.to,10)));
   const box=document.getElementById('adminSessions');
-  if(!sessions.length){ box.innerHTML=`<div class="empty"><div class="big">▣</div>No data collected yet. Start a session in User Mode, interact with CognoGPT, then return here.</div>`; return; }
+  if(!sessions.length){ box.innerHTML=`<div class="empty"><div class="big">▣</div>No data collected yet. Start a session in User Mode, interact with ChatBOT, then return here.</div>`; return; }
   box.innerHTML="";
   sessions.forEach((s,idx)=>{ const prints=s.prints||[]; let body="";
     body+=`<div class="data-row"><span class="k">Started</span><span class="v">${esc(s.startedAt)}</span></div>`;
