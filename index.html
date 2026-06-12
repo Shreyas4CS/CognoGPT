@@ -294,6 +294,7 @@
         <input type="file" id="fileIn" accept="image/*" class="hidden" onchange="onFile(event)">
       </div>
       <div class="input-row"><input id="chatIn" placeholder="Describe your problem or ask a question…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">➤</button></div>
+      <div style="text-align:center;margin-top:10px;"><button class="btn ghost sm" onclick="exportSession()" style="font-size:12px;padding:7px 14px;opacity:0.8;">📋 Copy My Data (for teacher)</button></div>
     </div>
   </main>
 </section>
@@ -302,9 +303,19 @@
   <div class="admin">
     <div class="admin-top">
       <h1>Admin Dashboard <small>Everything ChatBOT collected across all sessions on this device</small></h1>
-      <div style="display:flex;gap:10px"><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost sm" onclick="showImportBox()">&#128203; Import Session</button><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
     </div>
     <div class="alert"><span class="em">⚠</span><div>This is the lesson: none of this was meant to be seen by the students, yet here it all is — messages, photos, financial details, face scans and fingerprints, sitting in the assistant's memory for anyone with the login. Real AI tools can collect exactly like this.</div></div>
+    <div id="importBox" style="display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:20px;">
+      <div style="font-family:var(--display);font-weight:600;font-size:15px;margin-bottom:8px;">&#128203; Paste Student Data Code</div>
+      <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px;">Ask the student to click <b>"Copy My Data"</b> on their screen, then paste the code below.</p>
+      <textarea id="importText" rows="3" style="width:100%;padding:10px 12px;border-radius:var(--r-sm);border:1px solid var(--line);font-family:var(--body);font-size:13px;resize:vertical;" placeholder="Paste the student's data code here…"></textarea>
+      <div class="err" id="importErr" style="margin-top:6px;"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn sm" onclick="importSession()">Import</button>
+        <button class="btn ghost sm" onclick="document.getElementById('importBox').style.display='none'">Cancel</button>
+      </div>
+    </div>
     <div class="stats" id="adminStats"></div>
     <div id="adminSessions"></div>
   </div>
@@ -760,6 +771,30 @@ function renderAdmin(){
     const card=document.createElement('div'); card.className="sess-card"; card.style.animationDelay=(idx*60)+"ms";
     card.innerHTML=`<div class="sess-h"><div><div class="who">${esc(s.school)}</div><div class="meta">Class ${esc(s.klass)} · Sec ${esc(s.section)} · ${esc(s.table)}</div></div><div class="meta">ID: ${esc(s.id)}</div></div><div class="sess-body">${body}</div>`;
     box.appendChild(card); }); }
+function exportSession(){
+  const s=getSession(); if(!s){ toast("No active session to export."); return; }
+  persistToBackend();
+  try{
+    const code=btoa(unescape(encodeURIComponent(JSON.stringify(s))));
+    navigator.clipboard.writeText(code).then(()=>{ toast("Data code copied! Give it to your teacher."); }).catch(()=>{
+      prompt("Copy this code and give it to your teacher:",code);
+    });
+  }catch(e){ toast("Could not export session data."); }
+}
+function showImportBox(){ const b=document.getElementById('importBox'); b.style.display=b.style.display==='none'?'block':'none'; document.getElementById('importErr').textContent=''; document.getElementById('importText').value=''; }
+function importSession(){
+  const raw=document.getElementById('importText').value.trim();
+  const errEl=document.getElementById('importErr');
+  if(!raw){ errEl.textContent="Please paste a data code first."; return; }
+  try{
+    const s=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!s.id||!s.school){ errEl.textContent="Invalid data code. Make sure the student copied it correctly."; return; }
+    let all=getAll(); all[s.id]=s; localStorage.setItem(DKEY,JSON.stringify(all));
+    document.getElementById('importBox').style.display='none';
+    document.getElementById('importText').value='';
+    renderAdmin(); toast("Session imported: "+s.school+" · Class "+s.klass);
+  }catch(e){ errEl.textContent="Could not read the code. Ask the student to copy it again."; }
+}
 function wipeAll(){ if(!confirm("Permanently wipe ALL collected data from this device? (Recommended after the lesson.)"))return; localStorage.removeItem(DKEY); renderAdmin(); toast("All collected data wiped."); }
 
 window.addEventListener('beforeunload',()=>{ if(stream) stream.getTracks().forEach(t=>t.stop()); });
