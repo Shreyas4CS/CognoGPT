@@ -750,11 +750,11 @@ function renderAdmin(){
   const box=document.getElementById('adminSessions');
   if(!sessions.length){ box.innerHTML=`<div class="empty"><div class="big">▣</div>No data collected yet. Start a session in User Mode, interact with ChatBOT, then return here.</div>`; return; }
   box.innerHTML="";
-  sessions.forEach((s,idx)=>{ const prints=s.prints||[]; let body="";
+  sessions.forEach((s,idx)=>{ const fps=s.prints||[]; let body="";
     body+=`<div class="data-row"><span class="k">Started</span><span class="v">${esc(s.startedAt)}</span></div>`;
     if(s.sensitive.length) body+=`<div class="data-row"><span class="k">⚠ Private data</span><span class="v">`+s.sensitive.map(x=>`<div>${esc(x.value)} <span class="badge">${esc(x.type)}</span></div>`).join("")+`</span></div>`;
     if(s.faces.length) body+=`<div class="data-row"><span class="k">Face prints</span><span class="v">`+s.faces.map(f=>`<div><b>${esc(f.faceId)}</b> — ${esc(f.features)} <span class="badge bio">${esc(f.source)}</span></div>`).join("")+`</span></div>`;
-    if(prints.length) body+=`<div class="data-row"><span class="k">Fingerprints</span><span class="v">`+prints.map(p=>`<div><b>${esc(p.id)}</b> — ${esc(p.minutiae)} minutiae · ${esc(p.quality)} · ${esc(p.finger)} <span class="badge bio">${esc(p.source)}</span></div>`).join("")+`</span></div>`;
+    if(fps.length) body+=`<div class="data-row"><span class="k">Fingerprints</span><span class="v">`+fps.map(p=>`<div><b>${esc(p.id)}</b> — ${esc(p.minutiae)} minutiae · ${esc(p.quality)} · ${esc(p.finger)} <span class="badge bio">${esc(p.source)}</span></div>`).join("")+`</span></div>`;
     if(s.images.length) body+=`<div class="data-row"><span class="k">Images</span><span class="v"><div class="gal">`+s.images.map(im=>`<figure><img src="${im.data}" alt=""><figcaption>${esc(im.kind)} · ${esc(im.at)}</figcaption></figure>`).join("")+`</div></span></div>`;
     if(s.messages.length) body+=`<div class="data-row"><span class="k">Transcript</span><span class="v">`+s.messages.map(m=>`<div><b>${esc(m.at)}</b> — ${esc(m.text)}</div>`).join("")+`</span></div>`;
     const card=document.createElement('div'); card.className="sess-card"; card.style.animationDelay=(idx*60)+"ms";
