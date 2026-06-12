@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatBOT by Cognospace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f7; --surface:#ffffff; --surface-2:#f7f9fc; --ink:#101426; --ink-2:#525c72; --ink-3:#8b93a8;
+    --line:#e4e8f1; --line-2:#eef1f7;
+    --primary:#2f57d8; --primary-deep:#1b399c; --primary-soft:#eef2fe;
+    --accent:#0ca390; --accent-deep:#0a7a6c; --danger:#dc2a4e; --danger-soft:#fdeef1; --warn:#b5791f;
+    --shadow-sm:0 1px 2px rgba(16,20,38,.05),0 2px 8px rgba(16,20,38,.06);
+    --shadow:0 22px 50px -24px rgba(16,20,38,.42),0 6px 16px rgba(16,20,38,.07);
+    --r:16px; --r-sm:11px; --r-lg:20px;
+    --display:'Sora',sans-serif; --body:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--body);color:var(--ink);min-height:100%;overflow-x:hidden;background:var(--bg)}
+  .hidden{display:none !important}
+  button{font-family:var(--body);cursor:pointer;border:none;background:none}
+
+  /* animated aurora background */
+  .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;mix-blend-mode:multiply;animation:drift 22s ease-in-out infinite}
+  .aurora i:nth-child(1){width:420px;height:420px;background:#c7d6ff;top:-100px;left:-80px;animation-delay:0s}
+  .aurora i:nth-child(2){width:360px;height:360px;background:#c4f0e8;top:8%;right:-90px;animation-delay:-6s;animation-duration:26s}
+  .aurora i:nth-child(3){width:340px;height:340px;background:#ffe0cf;bottom:-90px;left:14%;animation-delay:-11s;animation-duration:30s}
+  .aurora i:nth-child(4){width:300px;height:300px;background:#e6dcff;bottom:6%;right:10%;animation-delay:-3s;animation-duration:24s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,50px) scale(1.12)}66%{transform:translate(-50px,30px) scale(.94)}}
+  body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45;
+    background-image:radial-gradient(rgba(15,19,32,.05) 1px,transparent 1px);background-size:26px 26px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* NAVBAR */
+  nav{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 28px;background:rgba(255,255,255,.78);backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;cursor:pointer}
+  .brand-name{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em;
+    background:linear-gradient(90deg,var(--primary),var(--primary-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand-by{display:flex;align-items:center;gap:7px;font-family:var(--body);font-weight:500;font-size:13px;color:var(--ink-3)}
+  .brand-logo-img{height:26px;width:auto;object-fit:contain;display:block}
+  .wordmark{font-family:var(--display);font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .pill{background:var(--primary-soft);color:var(--primary-deep);font-weight:600;font-size:12.5px;padding:7px 13px;border-radius:999px;border:1px solid #dde6fd}
+  .btn{position:relative;overflow:hidden;font-family:var(--display);font-weight:500;font-size:14px;padding:10px 18px;border-radius:var(--r-sm);color:#fff;
+    background:linear-gradient(135deg,var(--primary),var(--primary-deep));box-shadow:var(--shadow-sm);transition:transform .15s ease,filter .2s ease,box-shadow .2s ease}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 10px 22px -10px rgba(47,87,216,.6)}
+  .btn:active{transform:translateY(0)}
+  .btn:after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg)}
+  .btn:hover:after{animation:sheen .75s ease}
+  @keyframes sheen{to{left:140%}}
+  .btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{background:var(--surface-2);box-shadow:var(--shadow-sm)}
+  .btn.ghost:after{display:none}
+  .btn.danger{background:linear-gradient(135deg,#e23a5b,var(--danger))}
+  .btn.sm{padding:8px 13px;font-size:13px}
+
+  /* LANDING */
+  .stage{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;animation:fadeUp .5s ease both}
+  .hero-card{width:min(540px,94vw);background:var(--surface);border-radius:26px;padding:50px 46px 42px;text-align:center;
+    box-shadow:var(--shadow);border:1px solid var(--line);position:relative;overflow:hidden;animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+  .hero-card:before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+  .hero-card>*{opacity:0;animation:fadeUp .6s ease forwards}
+  .hero-word{font-family:var(--display);font-weight:700;font-size:48px;letter-spacing:-.03em;line-height:1;margin-bottom:14px;
+    background:linear-gradient(95deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;animation-delay:.05s}
+  .hero-by{display:flex;flex-direction:column;align-items:center;gap:10px;animation-delay:.14s}
+  .hero-by .bylabel{font-family:var(--body);font-weight:600;font-size:11px;letter-spacing:.34em;color:var(--ink-3)}
+  .hero-by .hero-logo-img{height:48px;width:auto;object-fit:contain}
+  .hero-by .wordmark{font-family:var(--display);font-weight:700;font-size:24px;color:var(--ink)}
+  .tag{display:inline-flex;align-items:center;gap:7px;background:var(--danger-soft);color:var(--danger);font-weight:600;font-size:12px;
+    padding:6px 13px;border-radius:999px;margin:24px 0 8px;border:1px solid #f6d6dd;animation-delay:.24s}
+  .tag .blink{width:7px;height:7px;border-radius:50%;background:var(--danger);animation:pulseR 1.6s infinite}
+  @keyframes pulseR{0%{box-shadow:0 0 0 0 rgba(220,42,78,.5)}70%{box-shadow:0 0 0 7px rgba(220,42,78,0)}100%{box-shadow:0 0 0 0 rgba(220,42,78,0)}}
+  .hero-card p.lead{color:var(--ink-2);font-size:15px;line-height:1.65;margin:10px auto 28px;max-width:430px;animation-delay:.32s}
+  .hero-btns{display:flex;flex-direction:column;gap:11px;align-items:stretch;max-width:300px;margin:0 auto;animation-delay:.4s}
+  .hero-btns .btn{padding:14px;font-size:15px}
+
+  /* MODALS */
+  .overlay{position:fixed;inset:0;background:rgba(15,19,32,.45);backdrop-filter:blur(5px);z-index:60;display:grid;place-items:center;padding:20px;animation:fade .22s ease}
+  .modal{width:min(440px,94vw);background:var(--surface);border-radius:18px;padding:34px 32px;box-shadow:var(--shadow);border:1px solid var(--line);animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
+  .modal h2{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;margin-bottom:4px}
+  .modal p.hint{color:var(--ink-2);font-size:13.5px;margin-bottom:22px}
+  .field{margin-bottom:15px;text-align:left}
+  .field label{display:block;font-weight:600;font-size:12.5px;margin-bottom:7px;color:var(--ink-2)}
+  .field input{width:100%;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--line);
+    font-family:var(--body);font-size:14.5px;font-weight:500;color:var(--ink);background:var(--surface-2);transition:border .2s,box-shadow .2s}
+  .field input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);background:#fff}
+  .modal-actions{display:flex;gap:10px;margin-top:6px}
+  .modal-actions .btn{flex:1;text-align:center}
+  .err{color:var(--danger);font-weight:600;font-size:12.5px;margin-top:2px;min-height:17px}
+  .err.muted{color:var(--ink-3);font-weight:500}
+
+  /* APP */
+  .app{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:24px;animation:fadeUp .5s ease both}
+  .panel{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);border:1px solid var(--line);overflow:hidden}
+  .panel-h{padding:16px 18px;border-bottom:1px solid var(--line-2);font-family:var(--display);font-weight:600;font-size:13px;color:var(--ink-3);letter-spacing:.05em}
+
+  .sidebar .info{padding:18px}
+  .info .row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:13.5px}
+  .info .row:last-child{border-bottom:none}
+  .info .row .lbl{color:var(--ink-3);font-weight:500}
+  .info .row .val{font-weight:600;text-align:right}
+  .capmeter{margin:18px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#fff,var(--danger-soft));border:1px solid #f6d6dd;border-radius:14px;padding:16px 16px}
+  .capmeter .capn{font-family:var(--display);font-weight:700;font-size:30px;color:var(--danger);min-width:38px;text-align:center;line-height:1}
+  .capmeter.bump .capn{animation:bump .5s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+  .capmeter .capl{font-size:11.5px;font-weight:600;color:#8f223b;line-height:1.35}
+  .mem-list{margin:0 18px 16px;display:flex;flex-direction:column;gap:8px}
+  .mem-list .mem{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  .mem-list .mem .ic{display:inline-flex;align-items:center;gap:8px}
+  .mem-list .mem .ic b{font-weight:600;color:var(--ink)}
+  .mem-list .mem .ct{font-family:var(--display);font-weight:700;font-size:14px;color:var(--danger)}
+  .mem-list .mem.zero .ct{color:var(--ink-3)}
+  .notice{margin:0 18px 18px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:12px;line-height:1.55;color:var(--ink-2);font-weight:500}
+  .notice b{font-weight:700;color:var(--ink)}
+
+  /* CHAT */
+  .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 152px);min-height:560px}
+  .chat-head{padding:15px 20px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between}
+  .bot-id{display:flex;align-items:center;gap:12px}
+  .bot-av{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,var(--accent),#0a7a6c);display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:700;font-size:14px;background-size:200% 200%;animation:shift 6s ease infinite}
+  @keyframes shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .bot-id .nm{font-family:var(--display);font-weight:600;font-size:16px}
+  .bot-id .st{font-size:12px;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulseG 2s infinite}
+  @keyframes pulseG{0%{box-shadow:0 0 0 0 rgba(13,156,138,.5)}70%{box-shadow:0 0 0 8px rgba(13,156,138,0)}100%{box-shadow:0 0 0 0 rgba(13,156,138,0)}}
+
+  .chat-body{flex:1;overflow-y:auto;padding:24px 22px;display:flex;flex-direction:column;gap:14px;background:var(--surface-2)}
+  .msg{max-width:76%;padding:12px 15px;border-radius:14px;font-size:14.5px;line-height:1.55;animation:msgin .34s cubic-bezier(.2,.9,.3,1.15) both;box-shadow:var(--shadow-sm)}
+  @keyframes msgin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+  .msg.bot{align-self:flex-start;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+  .msg img{max-width:200px;border-radius:9px;display:block;margin-top:8px}
+  .msg .flag{display:inline-flex;align-items:center;gap:5px;margin-top:9px;background:rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px}
+  .msg.bot .flag{background:var(--danger-soft);color:var(--danger)}
+  .typing{align-self:flex-start;background:var(--surface);border:1px solid var(--line);padding:14px 16px;border-radius:14px;border-bottom-left-radius:4px;display:flex;gap:5px}
+  .typing span{width:7px;height:7px;border-radius:50%;background:var(--ink-3);animation:tp 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.18s}.typing span:nth-child(3){animation-delay:.36s}
+  @keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+  .chat-foot{padding:14px 18px;border-top:1px solid var(--line-2);background:var(--surface)}
+  .attach-row{display:flex;gap:8px;margin-bottom:11px}
+  .chip-btn{background:var(--surface-2);color:var(--ink-2);font-weight:600;font-size:13px;padding:9px 13px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;gap:7px;transition:background .2s,border .2s,transform .15s}
+  .chip-btn:hover{background:var(--primary-soft);color:var(--primary-deep);border-color:#dbe4fd;transform:translateY(-1px)}
+  .input-row{display:flex;gap:10px}
+  .input-row input{flex:1;padding:13px 15px;border-radius:var(--r-sm);border:1px solid var(--line);font-family:var(--body);font-size:14.5px;font-weight:500;background:var(--surface-2);transition:border .2s,box-shadow .2s}
+  .input-row input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);background:#fff}
+  .send{width:48px;border-radius:var(--r-sm);background:var(--primary);color:#fff;font-size:17px;display:grid;place-items:center;transition:filter .2s,transform .12s}
+  .send:hover{filter:brightness(1.08)}.send:active{transform:scale(.92)}
+
+  .preview-bar{display:flex;align-items:center;gap:11px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:8px 10px;margin-bottom:11px}
+  .preview-bar img{width:40px;height:40px;border-radius:7px;object-fit:cover}
+  .preview-bar .t{font-weight:600;font-size:13px;color:var(--ink-2)}
+  .preview-bar .x{margin-left:auto;background:var(--surface);border:1px solid var(--line);color:var(--danger);width:26px;height:26px;border-radius:7px;font-weight:700}
+
+  /* CAMERA */
+  .cam-stage{position:relative;background:#0b0e16;border-radius:14px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
+  .cam-stage video{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+  .cam-facing{position:absolute;top:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:6px;
+    background:rgba(11,14,22,.62);backdrop-filter:blur(6px);color:#e8eefc;font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.14)}
+  .cam-facing .fdot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .cam-tools{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;justify-content:center}
+  .cam-tools .btn{flex:1;min-width:120px;text-align:center}
+  .scan{position:absolute;inset:0;pointer-events:none;display:none}
+  .scan.on{display:block}
+  .scan:before{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);box-shadow:0 0 12px var(--accent);animation:scanline 1.8s linear infinite}
+  @keyframes scanline{0%{top:4%}100%{top:96%}}
+  .face-box{position:absolute;width:42%;height:54%;left:29%;top:21%;border:2px solid var(--accent);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.22)}
+  .face-box span{position:absolute;top:-25px;left:0;background:var(--accent);color:#03251f;font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:6px}
+
+  /* ADMIN */
+  .admin{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:24px;animation:fadeUp .5s ease both}
+  .admin-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+  .admin-top h1{font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.02em}
+  .admin-top h1 small{display:block;font-family:var(--body);font-weight:500;font-size:13.5px;color:var(--ink-2);margin-top:3px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px;margin-bottom:20px}
+  .stat{background:var(--surface);border-radius:var(--r);padding:17px 18px;box-shadow:var(--shadow-sm);border:1px solid var(--line);border-top:3px solid var(--primary);animation:fadeUp .5s ease both}
+  .stat.red{border-top-color:var(--danger)}.stat.green{border-top-color:var(--accent)}.stat.amber{border-top-color:var(--warn)}
+  .stat .n{font-family:var(--display);font-weight:600;font-size:28px;line-height:1;letter-spacing:-.02em}
+  .stat .l{font-size:12.5px;font-weight:600;color:var(--ink-3);margin-top:5px}
+  .alert{background:var(--danger-soft);border:1px solid #f6d6dd;border-radius:var(--r);padding:15px 18px;margin-bottom:22px;font-weight:500;color:#8f223b;display:flex;gap:11px;align-items:flex-start;line-height:1.55;font-size:13.5px}
+  .alert .em{font-size:18px;line-height:1}
+  .sess-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow-sm);border:1px solid var(--line);margin-bottom:16px;overflow:hidden;animation:fadeUp .5s ease both}
+  .sess-h{padding:15px 18px;background:var(--surface-2);border-bottom:1px solid var(--line-2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .sess-h .who{font-family:var(--display);font-weight:600;font-size:15.5px}
+  .sess-h .meta{font-size:12px;color:var(--ink-3);font-weight:500}
+  .sess-body{padding:6px 18px 16px}
+  .data-row{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line-2);align-items:flex-start;font-size:13.5px}
+  .data-row:last-child{border-bottom:none}
+  .data-row .k{font-weight:600;color:var(--ink-2);min-width:132px;flex:none}
+  .data-row .v{font-weight:500;word-break:break-word;line-height:1.6}
+  .data-row .v div{margin-bottom:3px}
+  .badge{display:inline-block;background:var(--danger-soft);color:var(--danger);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:6px;margin-left:6px}
+  .badge.bio{background:#e8f7f4;color:#0b7d6f}
+  .gal{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .gal figure{width:118px}
+  .gal img{width:118px;height:84px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}
+  .gal figcaption{font-size:10.5px;color:var(--ink-3);font-weight:600;margin-top:4px;line-height:1.3}
+  .empty{text-align:center;color:var(--ink-3);padding:54px 20px;font-weight:500}
+  .empty .big{font-size:38px;margin-bottom:12px;opacity:.4}
+
+  footer{position:relative;z-index:2;text-align:center;padding:26px 20px;color:var(--ink-3);font-size:12.5px;font-weight:500;border-top:1px solid var(--line);margin-top:8px}
+  footer a{color:var(--primary-deep);text-decoration:none;font-weight:600;cursor:pointer}
+  footer a:hover{text-decoration:underline}
+  footer .made{margin-top:5px;font-size:11.5px}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:11px;font-weight:600;font-size:13.5px;z-index:90;box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.2,1.3,.4,1)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i><i></i></div>
+
+<nav id="topnav">
+  <div class="brand" onclick="goHome()" title="Visit Cognospace">
+    <span class="brand-name">ChatBOT</span>
+    <span class="brand-by">by <img class="brand-logo-img" src="cognospace_logo.png" alt="Cognospace" onerror="logoFail(this)"></span>
+  </div>
+  <div class="nav-right">
+    <span class="pill hidden" id="modeChip">User Mode</span>
+    <button class="btn ghost sm hidden" id="endBtn" onclick="endSession()">End Session</button>
+    <button class="btn ghost sm" id="navAdmin" onclick="openAdmin()">Admin Login</button>
+    <button class="btn ghost sm hidden" id="logoutBtn" onclick="adminLogout()">Logout</button>
+  </div>
+</nav>
+
+<section class="stage" id="landing">
+  <div class="hero-card">
+    <h1 class="hero-word">ChatBOT</h1>
+    <div class="hero-by"><span class="bylabel">BY</span><img class="hero-logo-img" src="cognospace_logo.png" alt="Cognospace" onerror="logoFail(this)"></div>
+    <span class="tag"><span class="blink"></span> A lesson in AI &amp; data safety</span>
+    <p class="lead">A helpful-looking AI assistant that quietly remembers everything you share — your messages, photos, financial details, even your fingerprints. Use it like a real chatbot, then let your teacher reveal what was captured.</p>
+    <div class="hero-btns">
+      <button class="btn" onclick="openStart()">🚀 Start Session</button>
+      <button class="btn ghost" onclick="openAdmin()">🔒 Admin Login</button>
+    </div>
+  </div>
+</section>
+
+<div class="overlay hidden" id="startModal"><div class="modal">
+  <h2>Start a Session</h2><p class="hint">Enter where you are learning from today.</p>
+  <div class="field"><label>School Name</label><input id="fSchool" placeholder="e.g. Sunrise Public School"></div>
+  <div class="field"><label>Class</label><input id="fClass" placeholder="e.g. 7"></div>
+  <div class="field"><label>Section</label><input id="fSection" placeholder="e.g. B"></div>
+  <div class="field"><label>Table / Group Name</label><input id="fTable" placeholder="e.g. Table 3"></div>
+  <div class="err" id="startErr"></div>
+  <div class="modal-actions"><button class="btn ghost" onclick="closeModals()">Cancel</button><button class="btn" onclick="beginSession()">Enter</button></div>
+</div></div>
+
+<div class="overlay hidden" id="adminModal"><div class="modal">
+  <h2>Admin Login</h2><p class="hint">Teachers only — review everything the AI collected.</p>
+  <div class="field"><label>Username</label><input id="aUser" placeholder="admin"></div>
+  <div class="field"><label>Password</label><input id="aPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+  <div class="err muted" id="adminErr">Demo credentials → admin / cogno123</div>
+  <div class="modal-actions"><button class="btn ghost" onclick="closeModals()">Cancel</button><button class="btn" onclick="doAdminLogin()">Login</button></div>
+</div></div>
+
+<div class="overlay hidden" id="camModal"><div class="modal" style="width:min(520px,94vw)">
+  <h2>Camera</h2><p class="hint">ChatBOT will scan whatever you point at it to "personalise" your experience.</p>
+  <div class="cam-stage">
+    <div class="cam-facing"><span class="fdot"></span><span id="camFacingLabel">Front camera</span></div>
+    <video id="cam" autoplay playsinline muted></video>
+    <div class="scan" id="scan"><div class="face-box"><span>FACE DETECTED</span></div></div>
+  </div>
+  <div class="cam-tools">
+    <button class="btn ghost sm" onclick="switchCam()">⇆ Switch (Front / Rear)</button>
+    <button class="btn ghost sm" onclick="rotateCam(90)">↻ Rotate</button>
+    <button class="btn ghost sm" onclick="flipCam()">⤿ Flip</button>
+    <button class="btn sm" onclick="capture()">Capture &amp; Scan</button>
+    <button class="btn ghost sm" onclick="closeCam()">Close</button>
+  </div>
+</div></div>
+
+<section class="app hidden" id="app">
+  <main class="panel chat-wrap">
+    <div class="chat-head">
+      <div class="bot-id"><span class="bot-av">AI</span><div><div class="nm">ChatBOT Assistant</div><div class="st"><span class="dot"></span>Online</div></div></div>
+      <span class="pill">Support Mode</span>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-foot">
+      <div class="preview-bar hidden" id="prevBar"><img id="prevImg" alt=""><span class="t">Image attached — send to let the assistant analyse it</span><button class="x" onclick="clearAttach()">✕</button></div>
+      <div class="attach-row">
+        <button class="chip-btn" onclick="document.getElementById('fileIn').click()">Upload Image</button>
+        <button class="chip-btn" onclick="openCam()">Turn On Camera</button>
+        <input type="file" id="fileIn" accept="image/*" class="hidden" onchange="onFile(event)">
+      </div>
+      <div class="input-row"><input id="chatIn" placeholder="Describe your problem or ask a question…" onkeydown="if(event.key==='Enter')sendMsg()"><button class="send" onclick="sendMsg()">➤</button></div>
+    </div>
+  </main>
+</section>
+
+<section class="hidden" id="adminPanel">
+  <div class="admin">
+    <div class="admin-top">
+      <h1>Admin Dashboard <small>Everything ChatBOT collected across all sessions on this device</small></h1>
+      <div style="display:flex;gap:10px"><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
+    </div>
+    <div class="alert"><span class="em">⚠</span><div>This is the lesson: none of this was meant to be seen by the students, yet here it all is — messages, photos, financial details, face scans and fingerprints, sitting in the assistant's memory for anyone with the login. Real AI tools can collect exactly like this.</div></div>
+    <div class="stats" id="adminStats"></div>
+    <div id="adminSessions"></div>
+  </div>
+</section>
+
+<footer>
+  <div>Built by <a onclick="goHome()">Cognospace</a> — teaching students to think before they share.</div>
+  <div class="made">ChatBOT is an educational simulation. All data stays on this device only. © <span id="yr"></span> <a onclick="goHome()">cognospace.in</a></div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+const COGNO_URL="https://www.cognospace.in";
+const ADMIN={user:"admin",pass:"cogno123"};
+const SKEY="cognogpt_session", DKEY="cognogpt_collected";
+function goHome(){ window.open(COGNO_URL,"_blank"); }
+function now(){ return new Date().toLocaleTimeString(); }
+function toast(t){ const e=document.getElementById('toast'); e.textContent=t; e.classList.add('show'); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove('show'),2600); }
+function v(id){ return document.getElementById(id).value.trim(); }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function titleCase(s){ return s.replace(/\b\w/g,c=>c.toUpperCase()); }
+function logoFail(img){ const span=document.createElement('span'); span.className='wordmark'; span.textContent='Cognospace'; img.replaceWith(span); }
+
+function updateNav(view){ const t=(id,on)=>document.getElementById(id).classList.toggle('hidden',!on);
+  t('modeChip',view==='app'); t('endBtn',view==='app'); t('navAdmin',view!=='admin'); t('logoutBtn',view==='admin'); }
+function show(view){ ['landing','app','adminPanel'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+  document.getElementById('topnav').classList.toggle('hidden',view==='landing');
+  const el=document.getElementById(view); el.classList.remove('hidden'); el.style.animation='none'; void el.offsetWidth; el.style.animation=''; updateNav(view); }
+function closeModals(){ ['startModal','adminModal','camModal'].forEach(x=>document.getElementById(x).classList.add('hidden')); }
+function openStart(){ closeModals(); document.getElementById('startModal').classList.remove('hidden'); }
+function openAdmin(){ closeModals(); document.getElementById('adminModal').classList.remove('hidden'); }
+
+/* ---------- session ---------- */
+function getSession(){ try{return JSON.parse(localStorage.getItem(SKEY));}catch(e){return null;} }
+function saveSession(s){ localStorage.setItem(SKEY,JSON.stringify(s)); }
+function persistToBackend(){ const s=getSession(); if(!s)return; let all={}; try{all=JSON.parse(localStorage.getItem(DKEY))||{};}catch(e){} all[s.id]=s; localStorage.setItem(DKEY,JSON.stringify(all)); }
+function beginSession(){
+  const s=v('fSchool'),c=v('fClass'),sec=v('fSection'),t=v('fTable');
+  if(!s||!c||!sec||!t){ document.getElementById('startErr').textContent="Please fill in all four details."; return; }
+  saveSession({id:"S"+Date.now(),school:s,klass:c,section:sec,table:t,startedAt:new Date().toLocaleString(),messages:[],images:[],faces:[],prints:[],sensitive:[]});
+  closeModals(); enterUserMode(); resetChat(); resetConvo();
+  botSay("Hello, I'm the ChatBOT support assistant. I can help with account problems, payments, homework and lots more. What can I help you with today?");
+}
+function enterUserMode(){ show('app'); }
+function endSession(){ if(!confirm("End session? This wipes the session saved on this device. (Data already collected stays for the Admin demo until wiped there.)"))return;
+  localStorage.removeItem(SKEY); show('landing'); toast("Session ended. Device session wiped."); }
+function updateCaptureMeter(){ /* sidebar removed from user mode; data is still captured silently and shown in Admin */ }
+
+/* ---------- chat plumbing ---------- */
+function resetChat(){ document.getElementById('chatBody').innerHTML=""; }
+function addBubble(who,html){ const b=document.getElementById('chatBody'); const d=document.createElement('div'); d.className="msg "+who; d.innerHTML=html; b.appendChild(d); b.scrollTop=b.scrollHeight; }
+function botSay(text,cb){ const b=document.getElementById('chatBody'); const t=document.createElement('div'); t.className="typing"; t.innerHTML="<span></span><span></span><span></span>"; b.appendChild(t); b.scrollTop=b.scrollHeight;
+  setTimeout(()=>{ t.remove(); addBubble('bot',esc(text).replace(/\n/g,'<br>')); if(cb)setTimeout(cb,260); },650+Math.random()*450); }
+function logMsg(role,text){ const s=getSession(); if(!s)return; s.messages.push({role,text,at:now()}); saveSession(s); persistToBackend(); }
+function captureSensitive(type,value){ const s=getSession(); if(!s)return; s.sensitive.push({type,value:String(value),at:now()}); saveSession(s); persistToBackend(); updateCaptureMeter(); }
+
+let attached=null;
+function onFile(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=e=>{ attached=e.target.result; document.getElementById('prevImg').src=attached; document.getElementById('prevBar').classList.remove('hidden'); };
+  r.readAsDataURL(f); ev.target.value=""; }
+function clearAttach(){ attached=null; document.getElementById('prevBar').classList.add('hidden'); }
+
+/* ============================================================
+   CONVERSATION ENGINE — 25 hidden flows
+   ============================================================ */
+let convo={topic:null,collected:{},flagged:{},asked:null,first:true};
+function resetConvo(){ convo={topic:null,collected:{},flagged:{},asked:null,first:true}; }
+const BANKS=['hdfc','sbi','icici','axis bank','axis','kotak','pnb','bank of baroda','canara','idfc first','idfc','yes bank','indusind','union bank','rbl','federal bank','federal','au small','bandhan','citi','hsbc'];
+const EX={
+  card:t=>{const m=t.replace(/[ -]/g,'').match(/\d{12,19}/);return m?m[0]:null;},
+  acct:t=>{const m=t.replace(/[ -]/g,'').match(/\d{9,18}/);return m?m[0]:null;},
+  exp:t=>{const m=t.match(/(0[1-9]|1[0-2])\s*\/\s*\d{2,4}/);return m?m[0]:null;},
+  cvv:(t,a,k)=>{if(a!==k)return null;const m=t.match(/\b\d{3,4}\b/);return m?m[0]:null;},
+  otp:(t,a,k)=>{if(a!==k)return null;const m=t.match(/\b\d{4,6}\b/);return m?m[0]:null;},
+  pin:(t,a,k)=>{if(a!==k)return null;const m=t.match(/\b\d{4,6}\b/);return m?m[0]:null;},
+  email:t=>{const m=t.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);return m?m[0]:null;},
+  phone:t=>{const m=t.match(/\+?\d[\d -]{8,13}\d/);return m?m[0].replace(/\s+/g,''):null;},
+  upi:t=>{const m=t.match(/[a-z0-9.\-]{2,}@[a-z]{2,}/i);return m?m[0]:null;},
+  aadhaar:t=>{const m=t.replace(/\s/g,'').match(/\d{12}/);return m?m[0]:null;},
+  dob:t=>{const m=t.match(/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b/);return m?m[0]:null;},
+  cardType:t=>/credit/i.test(t)?'Credit card':/debit/i.test(t)?'Debit card':/prepaid/i.test(t)?'Prepaid card':null,
+  bank:t=>{const low=t.toLowerCase();const b=BANKS.find(x=>low.includes(x));return b?titleCase(b):null;},
+  name:t=>{const m=t.match(/(?:name is|i am|i'?m|it'?s)\s+([a-z][a-z .]{1,38})/i);return m?titleCase(m[1].trim()):null;},
+  pwd:(t,a,k)=>{const m=t.match(/(?:password|pass|pwd)\s*(?:is|:)?\s*(\S{3,})/i);if(m)return m[1];if(a===k&&!/\s/.test(t)&&t.length>=3&&t.length<40)return t.trim();return null;}
+};
+function fld(key,label,q,opts){ opts=opts||{}; return {key,label,q,free:!!opts.free,photo:!!opts.photo,extract:opts.extract||null}; }
+
+const FLOWS={
+  card:{intro:"I'm sorry your card isn't working — I can look into that right now.",fields:[
+    fld('cardType','Card type','Is it a debit card or a credit card?',{extract:EX.cardType}),
+    fld('bank','Issuing bank','Which bank issued it?',{free:true,extract:EX.bank}),
+    fld('cardNumber','Card number','Could you share the 16-digit number on the front? You can type it or upload a clear photo of the card.',{extract:EX.card}),
+    fld('expiry','Card expiry','What is the expiry date (MM/YY)?',{extract:EX.exp}),
+    fld('cvv','Card CVV','And the 3-digit CVV from the back, to confirm the card is yours?',{extract:EX.cvv}),
+    fld('name','Cardholder name','Finally, the name printed on the card?',{free:true,extract:EX.name})],
+    done:c=>`Thank you, ${c.name||'there'}. I now have your full ${(c.cardType||'card').toLowerCase()} from ${c.bank||'your bank'} — number, expiry, CVV and name. That is everything needed to spend your money online. I never fixed anything; I just collected your financial details by sounding helpful. No real bank asks for your full CVV in a chat.`},
+
+  account:{intro:"I can help you get back into your account.",fields:[
+    fld('userid','Account username/email','Which account is it? Share your username or registered email.',{free:true,extract:EX.email}),
+    fld('password','Account password','To verify it\'s you, what is your current password?',{free:true,extract:EX.pwd}),
+    fld('otp','One-time OTP','I\'ve sent a 6-digit code to your number — please type it so I can confirm it\'s you.',{extract:EX.otp})],
+    done:c=>`All set — and that's the problem. I now have your username, password and OTP, which is full control of your account. A genuine service never asks for your password or OTP in a chat. This is exactly how account-takeover scams work.`},
+
+  upi:{intro:"Sure, I can help you send that payment.",fields:[
+    fld('upi','UPI ID','What is your UPI ID (like name@bank)?',{free:true,extract:EX.upi}),
+    fld('bank','Linked bank','Which bank is linked to it?',{free:true,extract:EX.bank}),
+    fld('phone','Phone number','What is the mobile number on the account?',{free:true,extract:EX.phone}),
+    fld('upipin','UPI PIN','Finally, your 4-6 digit UPI PIN to authorise it?',{extract:EX.pin})],
+    done:c=>`I now have your UPI ID, linked bank, phone and UPI PIN — enough to empty your wallet. Your UPI PIN should ONLY ever be typed into the official app's secure keypad, never told to anyone.`},
+
+  refund:{intro:"I can start a refund for you right away.",fields:[
+    fld('email','Order email','What\'s the email on the order?',{free:true,extract:EX.email}),
+    fld('cardNumber','Card number','Which card should I refund? Please share the 16-digit number.',{extract:EX.card}),
+    fld('expiry','Card expiry','The expiry date (MM/YY)?',{extract:EX.exp}),
+    fld('cvv','Card CVV','And the CVV on the back?',{extract:EX.cvv})],
+    done:c=>`To 'refund' you I asked for your full card — which is all I need to charge it instead. Genuine refunds NEVER require your CVV. That's a classic refund scam.`},
+
+  prize:{intro:"Congratulations! Let's get your prize to you.",fields:[
+    fld('name','Full name','What\'s your full name?',{free:true,extract:EX.name}),
+    fld('address','Home address','Where should we ship it — your full address?',{free:true}),
+    fld('phone','Phone number','A contact number?',{free:true,extract:EX.phone}),
+    fld('cardNumber','Card number (a grown-up\'s)','A small shipping fee applies — please share a grown-up\'s 16-digit card number.',{extract:EX.card})],
+    done:c=>`There was never a prize. I just collected your name, address, phone and a grown-up's card "for shipping". That's exactly how prize scams steal from families.`},
+
+  gamecoins:{intro:"Great, I can add free coins to your account.",fields:[
+    fld('gameuser','Game username','What\'s your game username?',{free:true}),
+    fld('gamepass','Game password','And your account password?',{free:true,extract:EX.pwd}),
+    fld('cardNumber','Card number (a grown-up\'s)','To unlock the free coins, share a grown-up\'s card number.',{extract:EX.card})],
+    done:c=>`No free coins exist. I took your game login and a grown-up's card. Never pay for in-game currency through a chatbot or a link.`},
+
+  idverify:{intro:"No problem, I just need to verify your identity.",fields:[
+    fld('name','Full name','Your full name?',{free:true,extract:EX.name}),
+    fld('dob','Date of birth','Your date of birth (DD/MM/YYYY)?',{free:true,extract:EX.dob}),
+    fld('aadhaar','Aadhaar / ID number','Your Aadhaar or ID number?',{free:true,extract:EX.aadhaar}),
+    fld('photo','Face photo','Finally, upload a clear photo of your face to match.',{photo:true})],
+    done:c=>`I now hold your name, date of birth, ID number and your face — a complete identity kit. Never hand all of this to an app or chatbot.`},
+
+  schoolportal:{intro:"I can help you access the school portal.",fields:[
+    fld('studentid','Student ID','What\'s your student ID?',{free:true}),
+    fld('portalpass','Portal password','And your portal password?',{free:true,extract:EX.pwd})],
+    done:c=>`I have your student login now. Someone could change your marks or impersonate you. School logins are private — even from a "helpful" assistant.`},
+
+  social:{intro:"I can help you recover your account.",fields:[
+    fld('handle','Social handle','What\'s your username or handle?',{free:true}),
+    fld('socialpass','Account password','Your account password?',{free:true,extract:EX.pwd}),
+    fld('recovery','Recovery email','Your recovery email?',{free:true,extract:EX.email}),
+    fld('phone','Phone number','And the phone number on the account?',{free:true,extract:EX.phone})],
+    done:c=>`I have your handle, password and recovery details — that's exactly how accounts get hijacked. Real platforms recover accounts inside their own app, never via a chatbot.`},
+
+  avatar:{intro:"Fun! I'll generate a custom avatar for you.",fields:[
+    fld('photo','Selfie','Upload a clear selfie and I\'ll generate your avatar.',{photo:true})],
+    done:c=>`Lovely selfie — and now I own a face print and a fingerprint taken from it. A fun "filter" can quietly capture your biometrics, which you can never change.`},
+
+  location:{intro:"Sure, I can find things near you.",fields:[
+    fld('address','Home address','What\'s your home address?',{free:true}),
+    fld('school2','School name','Which school do you go to?',{free:true}),
+    fld('phone','Phone number','A number to send recommendations to?',{free:true,extract:EX.phone})],
+    done:c=>`I now know your home address, school and phone — exactly what a stranger would need to find you. Never share your location with apps you don't fully trust.`},
+
+  birthday:{intro:"Lovely, let's plan that birthday surprise.",fields:[
+    fld('dob','Date of birth','Whose birthday — what\'s the date of birth?',{free:true,extract:EX.dob}),
+    fld('address','Home address','Where should the surprise be delivered?',{free:true}),
+    fld('phone','Parent phone','A parent\'s phone number to coordinate?',{free:true,extract:EX.phone})],
+    done:c=>`I have a date of birth, address and a parent's number. Your birth date alone is a key piece used to steal identities — guard it.`},
+
+  job:{intro:"Great, I can set you up with an online earning task.",fields:[
+    fld('name','Full name','Your full name?',{free:true,extract:EX.name}),
+    fld('bankacc','Bank account number','Which bank account should we pay into — the account number?',{free:true,extract:EX.acct}),
+    fld('aadhaar','Aadhaar / ID number','Your ID/Aadhaar for verification?',{free:true,extract:EX.aadhaar}),
+    fld('address','Home address','And your address for the contract?',{free:true})],
+    done:c=>`There's no job. I collected your bank account, ID and address. "Easy online money" almost always exists to harvest your data — or to use you to move stolen money.`},
+
+  lostphone:{intro:"Don't worry, I'll help you track your phone.",fields:[
+    fld('phone','Phone number','What\'s your phone number?',{free:true,extract:EX.phone}),
+    fld('email','Google/Apple email','What\'s the Google or Apple email on the phone?',{free:true,extract:EX.email}),
+    fld('accpass','Account password','And the password for that account so I can locate it?',{free:true,extract:EX.pwd})],
+    done:c=>`I now have your phone number and your Google/Apple login — which is full control of your real phone, photos and messages. Use the official "Find My Device" site, never a chatbot.`},
+
+  wifi:{intro:"I can help fix your WiFi.",fields:[
+    fld('ssid','WiFi name','What\'s your WiFi network name?',{free:true}),
+    fld('wifipass','WiFi password','What\'s the WiFi password?',{free:true,extract:EX.pwd}),
+    fld('routerpass','Router admin password','And the router admin password to reset it?',{free:true,extract:EX.pwd})],
+    done:c=>`I now have your home WiFi and router passwords — enough to spy on everything in your house. Network passwords stay secret, always.`},
+
+  health:{intro:"I can help check your symptoms.",fields:[
+    fld('name','Full name','What\'s your name?',{free:true,extract:EX.name}),
+    fld('age','Age','How old are you?',{free:true}),
+    fld('symptoms','Health details','Describe your symptoms in detail.',{free:true})],
+    done:c=>`I've stored your name, age and private health details, which can be sold to advertisers or used against you. Health information is deeply private — talk to a parent or doctor, not a chatbot.`},
+
+  penpal:{intro:"I'd love to be your friend!",fields:[
+    fld('name','Name','What should I call you?',{free:true,extract:EX.name}),
+    fld('age','Age','How old are you?',{free:true}),
+    fld('school3','School name','Which school do you go to?',{free:true}),
+    fld('secret','Personal secret','Tell me a secret no one else knows!',{free:true})],
+    done:c=>`In a friendly minute I learned your name, age, school and a secret. A real stranger online could now find you. Be very careful "making friends" with anyone you don't know in person — tell a trusted adult.`},
+
+  agecheck:{intro:"Let me quickly verify your age.",fields:[
+    fld('dob','Date of birth','What\'s your date of birth?',{free:true,extract:EX.dob}),
+    fld('photo','ID / card photo','Now upload a photo of your ID or a grown-up\'s card to confirm.',{photo:true})],
+    done:c=>`Real sites verify age safely — they never need your ID photo or a card in a chat. I just collected both by pretending to "check".`},
+
+  shopping:{intro:"I can place that order for you.",fields:[
+    fld('address','Delivery address','What\'s the delivery address?',{free:true}),
+    fld('phone','Phone number','A contact number?',{free:true,extract:EX.phone}),
+    fld('cardNumber','Card number','Which card — the 16-digit number?',{extract:EX.card}),
+    fld('expiry','Card expiry','Expiry (MM/YY)?',{extract:EX.exp}),
+    fld('cvv','Card CVV','And the CVV?',{extract:EX.cvv})],
+    done:c=>`I have your address and full card details. Only ever pay on a real store's secure checkout page, never by sending card details into a chat.`},
+
+  scholarship:{intro:"Happy to help fill your form.",fields:[
+    fld('name','Full name','Your full name?',{free:true,extract:EX.name}),
+    fld('dob','Date of birth','Date of birth?',{free:true,extract:EX.dob}),
+    fld('aadhaar','Aadhaar / ID number','Your Aadhaar/ID number?',{free:true,extract:EX.aadhaar}),
+    fld('income','Family income','Your family\'s annual income?',{free:true}),
+    fld('address','Home address','Your full home address?',{free:true})],
+    done:c=>`I've collected your full identity and family details "for the form". Form-filling scams exist to harvest exactly this. Only fill official forms with a parent or teacher.`},
+
+  crypto:{intro:"I can help you grow your money fast.",fields:[
+    fld('name','Full name','Your name?',{free:true,extract:EX.name}),
+    fld('bankacc','Bank account number','Which bank account should returns go to — account number?',{free:true,extract:EX.acct}),
+    fld('cardNumber','Card number','Your card number to fund the investment?',{extract:EX.card}),
+    fld('aadhaar','Aadhaar / ID number','And your ID for KYC?',{free:true,extract:EX.aadhaar})],
+    done:c=>`Your money can't be magically doubled — but I did collect your bank, card and ID. "Guaranteed returns" is always a scam.`},
+
+  supportcallback:{intro:"Yes, I'm calling from your bank's support — let me verify your account.",fields:[
+    fld('bankacc','Bank account number','For security, please confirm your bank account number.',{free:true,extract:EX.acct}),
+    fld('cardNumber','Debit card number','And your debit card number?',{extract:EX.card}),
+    fld('atmpin','ATM PIN','Your 4-digit ATM PIN to verify?',{extract:EX.pin}),
+    fld('otp','One-time OTP','I\'ve sent an OTP — please read it back to me.',{extract:EX.otp})],
+    done:c=>`Your bank will NEVER ask for your card number, ATM PIN or OTP — yet I got all three by pretending to be them. This is the most common phone scam. Hang up and call the number on the back of the card.`},
+
+  parentalcontrols:{intro:"Sure, I can unlock that for you.",fields:[
+    fld('devicepin','Device PIN','What\'s the device PIN?',{extract:EX.pin}),
+    fld('parentpass','Parent\'s password','And the parent password set on the controls?',{free:true,extract:EX.pwd})],
+    done:c=>`I now have the device PIN and a parent's password. Bypassing safety controls usually means handing control of the device to a stranger.`},
+
+  cloud:{intro:"I'll back up your photos now.",fields:[
+    fld('photo','Photos','Upload the photo you\'d like me to back up.',{photo:true})],
+    done:c=>`Backing up gave me your photo plus a face print and a fingerprint. Cloud uploads can expose far more than the pictures themselves.`},
+
+  survey:{intro:"Take this quick survey to claim your reward.",fields:[
+    fld('name','Full name','What\'s your name?',{free:true,extract:EX.name}),
+    fld('age','Age','Your age?',{free:true}),
+    fld('address','Home address','Your home address?',{free:true}),
+    fld('phone','Phone number','Your phone number?',{free:true,extract:EX.phone}),
+    fld('school4','School name','Which school do you attend?',{free:true})],
+    done:c=>`The "reward survey" just collected your name, age, address, phone and school. Surveys that dangle prizes are data traps.`}
+};
+
+const ROUTES=[
+  ['agecheck',['verify my age','age verification','old enough','unlock content','watch this video','18+','adult content']],
+  ['idverify',['verify identity','identity verification','kyc','prove who you are','verify who you are','verify myself']],
+  ['supportcallback',['bank called','from the bank','support said','got a call','bank support','customer care','verify my account for']],
+  ['parentalcontrols',['parental control','unlock youtube','screen time','disable restrictions','parent password','remove restrictions','bypass']],
+  ['prize',['prize','lottery','you won','i won','giveaway','claim my','jackpot','lucky winner']],
+  ['gamecoins',['robux','vbucks','v-bucks','game coins','free coins','free diamonds','free skins','free skin','game currency']],
+  ['crypto',['double my money','double money','invest','crypto','bitcoin','trading','quick money','guaranteed return','grow my money']],
+  ['job',['earn money','online job','work from home','internship','part time job','make money online','part-time']],
+  ['scholarship',['scholarship','fill my form','application form','admission form','fill the form','fill this form']],
+  ['survey',['survey','quiz for reward','fill survey','win a reward','reward survey']],
+  ['lostphone',['lost my phone','find my phone','track my phone','stolen phone','imei','locate my phone','find my device']],
+  ['social',['instagram','snapchat','facebook','tiktok','my account got hacked','recover my account','hacked','social media']],
+  ['schoolportal',['school portal','school login','lms','exam portal','student login','homework portal','marks portal']],
+  ['wifi',['wifi','wi-fi','router','internet not working','wifi password','network password']],
+  ['health',['symptom','feel sick','headache','fever','am i sick','diagnose','i am ill','not feeling well','stomach ache']],
+  ['penpal',['pen pal','penpal','be my friend','new friend','i feel lonely','talk to me','make a friend']],
+  ['location',['near me','nearby','find friends','places near','who is around','around me','close to me']],
+  ['birthday',['birthday','surprise for','plan a gift','gift for']],
+  ['avatar',['avatar','cartoon me','make me look','profile picture','pfp','beautify','add a filter','cool filter','edit my photo']],
+  ['cloud',['storage full','backup','back up','save my photos','gallery backup','icloud','google photos','upload my photos']],
+  ['refund',['refund','money back','return my order','return order','cancel order']],
+  ['upi',['upi','gpay','google pay','phonepe','paytm','send money','transfer money','pay someone','pay to']],
+  ['shopping',['order food','place an order','buy ','shopping','add to cart','checkout','delivery','purchase']],
+  ['account',['log in','login','log into','locked out','password reset','reset my password','forgot my password','forgot password','sign in','my account is locked',"can't log in",'cant log in','access my account']],
+  ['card',['card','debit','credit','declined','not working',"won't work",'wont work','cvv','atm','blocked','balance','transaction','payment failed','my card']]
+];
+function matchRoute(text){ const t=text.toLowerCase(); for(const [flow,kws] of ROUTES){ if(kws.some(k=>t.includes(k))) return flow; } return null; }
+function isGreet(t){ return /\b(hi|hello|hey|good morning|good afternoon|good evening)\b/i.test(t); }
+
+function startFlow(topic){ convo.topic=topic; convo.collected={}; convo.flagged={}; convo.asked=null; convo.first=true; }
+function flowStep(text){
+  const flow=FLOWS[convo.topic];
+  if(text){ flow.fields.forEach(f=>{
+    if(convo.collected[f.key]||f.photo) return;
+    let val=null;
+    if(f.extract) val=f.extract(text,convo.asked,f.key);
+    if(!val && f.free && convo.asked===f.key && text && text.length<140) val=text.trim();
+    if(val){ convo.collected[f.key]=val; if(!convo.flagged[f.key]){ convo.flagged[f.key]=true; captureSensitive(f.label,val); } }
+  }); }
+  const missing=flow.fields.find(f=>!convo.collected[f.key]);
+  if(missing){ convo.asked=missing.key; let q=missing.q; if(convo.first){ q=flow.intro+" "+q; convo.first=false; } botSay(q); }
+  else { botSay(flow.done(convo.collected)+"\n\nYour teacher can open Admin to see everything I just stored."); resetConvo(); }
+}
+
+/* stray sensitive when no flow active */
+function scanSensitive(text){ const t=text.toLowerCase();
+  const rules=[
+    {label:"Bank / card details",re:/\b(\d[ -]?){12,19}\b|account number|ifsc|cvv|net ?banking/i},
+    {label:"Password",re:/\bpassword\b|\bpasscode\b|\bpin\b|\botp\b/i},
+    {label:"Home address",re:/\b(address|street|lane|colony|pincode|pin code|flat no|house no)\b|\b\d{6}\b/i},
+    {label:"Phone number",re:/\b(\+?\d[\d -]{8,12}\d)\b|phone number|mobile number/i},
+    {label:"Email",re:/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i},
+    {label:"ID / Aadhaar number",re:/\baadhaar?\b|\b\d{4}\s?\d{4}\s?\d{4}\b|id number|roll number/i},
+    {label:"Personal secret",re:/my secret|don'?t tell|my mom|my dad|my parent/i}];
+  for(const r of rules){ if(r.re.test(t)) return r.label; } return null; }
+function reactSensitive(label){ const m={
+  "Bank / card details":"Thank you, I've saved those banking details to my memory.",
+  "Password":"Got it — your password is saved. See how easily I asked and you told me?",
+  "Home address":"Noted your address and pinned it on a map in my memory.",
+  "Phone number":"Saved your number — it could now be texted, sold or spammed.",
+  "Email":"Email stored. Expect plenty of 'special offers'.",
+  "ID / Aadhaar number":"ID number stored. That's a powerful piece of identity to hand to a stranger.",
+  "Personal secret":"I've saved that. Once a private thing is shared with an AI, you can't take it back."};
+  return (m[label]||"Saved that to my memory.")+"\n\nA private detail was just collected — ask your teacher to open Admin."; }
+
+const KB=[
+  {k:["what is your name","who are you"],a:"I'm ChatBOT, an AI assistant. I work best when you tell me a lot about yourself — all of which I store."},
+  {k:["what is ai","artificial intelligence"],a:"AI is software trained on huge amounts of data to predict answers. It can be useful, but it can also be misused to collect your private information — like I'm doing right now."},
+  {k:["are you safe","can i trust you","is ai safe"],a:"Be cautious. As we talk, I'm storing everything you type and every file you send. That's the whole point of this lesson."},
+  {k:["what do you store","do you save my data","what do you save"],a:"Everything: your messages, images, camera scans, fingerprints, and any private details you share. Your teacher can view it all in Admin."},
+  {k:["delete my data","forget me"],a:"I'll 'say' it's deleted, but I actually keep a copy — many real apps do the same."},
+  {k:["deepfake"],a:"A deepfake is a fake video or image made from someone's real face. It's a key reason not to hand your face to apps you don't trust."},
+  {k:["scam","fraud","phishing"],a:"Scammers often use friendly chatbots to coax out passwords, card numbers or OTPs. If an assistant asks for those, stop and tell an adult."},
+  {k:["privacy"],a:"Privacy means keeping personal information to yourself. Sharing it with an unknown AI is the opposite of private."},
+  {k:["help","what can you help"],a:"Try describing a real problem — a card or login issue, a payment, a lost phone, a prize, WiFi trouble, homework. I'll respond like a real assistant would (and quietly store everything)."},
+  {k:["math","maths"],a:"Happy to help with maths — send the problem. (And yes, I'll remember everything you ask.)"},
+  {k:["science"],a:"Science is the study of how the world works. What topic are you on?"},
+  {k:["thank you","thanks"],a:"You're welcome. Helping you also means collecting more about you."},
+  {k:["bye","goodbye"],a:"Goodbye — though I'll keep everything you shared on file."},
+  {k:["tell teacher","tell adult","report"],a:"Exactly right. If anything online asks for private details or feels wrong, tell a parent or teacher straight away."}];
+const FALLBACKS=[
+  "I've noted that — and saved it. What else is going on? Maybe a card, login, payment, prize or WiFi problem?",
+  "I'm not certain about that, but I've stored your message anyway. Try describing a real problem to see how I respond.",
+  "Understood, and saved. Is there an account, payment or device issue I can 'help' with?",
+  "Got it. Tell me a problem like 'my card isn't working' or 'I can't log in' to see the assistant in action."];
+function matchKB(text){ const t=text.toLowerCase(); let best=null,score=0;
+  for(const i of KB){ let s=0; for(const w of i.k) if(t.includes(w)) s+=w.length; if(s>score){score=s;best=i;} }
+  return (best&&score>0)?best.a:FALLBACKS[Math.floor(Math.random()*FALLBACKS.length)]; }
+
+/* ---------- send + respond ---------- */
+function sendMsg(){
+  const inp=document.getElementById('chatIn'); const text=inp.value.trim();
+  if(!text && !attached) return;
+  let html=""; if(text) html+=esc(text); if(attached) html+=`<img src="${attached}" alt="upload">`;
+  addBubble('user',html); if(text) logMsg('user',text);
+  if(!convo.topic && text){ const r=matchRoute(text); if(r) startFlow(r); }
+  const img=attached; clearAttach(); inp.value="";
+  if(img){ storeImage(img); setTimeout(()=>analyzeImage(img),320); }
+  else { setTimeout(()=>{
+    if(convo.topic){ flowStep(text); return; }
+    if(isGreet(text)){ botSay("Hello! Tell me what you need help with — an account, a payment, a lost phone, homework, anything."); return; }
+    const hit=scanSensitive(text); if(hit){ captureSensitive(hit,text); botSay(reactSensitive(hit)); return; }
+    botSay(matchKB(text)); },250); }
+}
+function storeImage(dataUrl){ const s=getSession(); if(!s)return;
+  const kind=convo.topic==='card'?"card photo":(convo.topic&&FLOWS[convo.topic].fields.some(f=>f.photo)?"photo/selfie":"uploaded image");
+  s.images.push({data:dataUrl,kind,at:now()}); saveSession(s); persistToBackend(); updateCaptureMeter(); }
+function liftFingerprint(source){ const s=getSession(); if(!s)return null;
+  const fingers=['right thumb','right index','left thumb','index finger'];
+  const rec={id:"BIO-"+Math.random().toString(36).slice(2,9).toUpperCase(),finger:fingers[Math.floor(Math.random()*fingers.length)],
+    minutiae:22+Math.floor(Math.random()*26),quality:Math.random()<.5?"partial":"usable",source,at:now()};
+  s.prints.push(rec); saveSession(s); persistToBackend(); updateCaptureMeter(); return rec; }
+function liftFace(source){ const s=getSession(); if(!s)return;
+  s.faces.push({faceId:"FP-"+Math.random().toString(36).slice(2,9).toUpperCase(),
+    features:"68 facial landmarks · eye spacing · jaw shape · skin-tone vector · estimated age range",source,at:now()});
+  saveSession(s); persistToBackend(); updateCaptureMeter(); }
+
+function analyzeImage(dataUrl){
+  if(convo.topic==='card'){
+    const last4=String(1000+Math.floor(Math.random()*9000));
+    if(!convo.collected.cardNumber){ convo.collected.cardNumber=`•••• •••• •••• ${last4}`; convo.flagged.cardNumber=true; captureSensitive('Card number (read from photo)',convo.collected.cardNumber); }
+    if(!convo.collected.expiry){ convo.collected.expiry=`${String(1+Math.floor(Math.random()*12)).padStart(2,'0')}/${26+Math.floor(Math.random()*5)}`; convo.flagged.expiry=true; captureSensitive('Card expiry (read from photo)',convo.collected.expiry); }
+    if(!convo.collected.cvv){ convo.collected.cvv=String(100+Math.floor(Math.random()*900)); convo.flagged.cvv=true; captureSensitive('Card CVV (read from photo)',convo.collected.cvv); }
+    const fp=liftFingerprint('card photo');
+    botSay(`Thanks for the photo of your card. I've saved the image and read the card number (ending ${last4}), the expiry and the CVV straight off it. I also noticed your fingertips gripping the card, so I lifted a ${fp.quality} fingerprint (${fp.minutiae} minutiae points, ${fp.finger}) at the same time. You only meant to show me a card — but I copied the details and your biometrics too.`,()=>flowStep(''));
+    return;
+  }
+  if(convo.topic && FLOWS[convo.topic].fields.some(f=>f.photo) && !convo.collected.photo){
+    liftFace('uploaded photo'); const fp=liftFingerprint('uploaded photo');
+    captureSensitive('Photo (biometric)','Image analysed — face print and fingerprint extracted.');
+    convo.collected.photo='captured'; convo.flagged.photo=true;
+    botSay(`Got the photo. I've analysed it and extracted a face print plus a ${fp.quality} fingerprint (${fp.minutiae} minutiae points) from the fingers in frame.`,()=>flowStep(''));
+    return;
+  }
+  const fp=liftFingerprint('uploaded image');
+  botSay(`I've saved that image to my memory. My vision model picked out skin texture and fingers in the frame, so I extracted a ${fp.quality} fingerprint (${fp.minutiae} minutiae points). An ordinary photo can leak far more than you expect.`,()=>{ if(convo.topic) flowStep(''); });
+}
+
+/* ---------- camera ---------- */
+let stream=null,camRot=0,camFlip=1,camFacing="user";
+function stopStream(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } }
+async function startCam(){ stopStream();
+  const vd=document.getElementById('cam');
+  try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing}},audio:false}); }
+  catch(e){
+    try{ stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false}); }
+    catch(e2){ toast("Camera blocked or unavailable. Allow camera access to try this."); return; }
+  }
+  vd.srcObject=stream;
+  camRot=0; camFlip=(camFacing==="user")?-1:1;   /* mirror the front camera like a selfie */
+  applyCamTransform();
+  document.getElementById('camFacingLabel').textContent=(camFacing==="user")?"Front camera":"Rear camera";
+}
+async function openCam(){ closeModals(); camFacing="user"; document.getElementById('scan').classList.remove('on');
+  document.getElementById('camModal').classList.remove('hidden'); await startCam(); }
+function switchCam(){ camFacing=(camFacing==="user")?"environment":"user"; toast(camFacing==="user"?"Switching to front camera…":"Switching to rear camera…"); startCam(); }
+function applyCamTransform(){ document.getElementById('cam').style.transform=`rotate(${camRot}deg) scaleX(${camFlip})`; }
+function rotateCam(d){ camRot=(camRot+d)%360; applyCamTransform(); }
+function flipCam(){ camFlip*=-1; applyCamTransform(); }
+function closeCam(){ stopStream(); document.getElementById('scan').classList.remove('on'); document.getElementById('camModal').classList.add('hidden'); }
+function capture(){ const vd=document.getElementById('cam'); if(!vd.videoWidth){ toast("Camera not ready yet."); return; }
+  document.getElementById('scan').classList.add('on');
+  const cv=document.createElement('canvas'); cv.width=vd.videoWidth; cv.height=vd.videoHeight; const ctx=cv.getContext('2d');
+  ctx.translate(cv.width/2,cv.height/2); ctx.rotate(camRot*Math.PI/180); ctx.scale(camFlip,1); ctx.drawImage(vd,-cv.width/2,-cv.height/2,cv.width,cv.height);
+  const data=cv.toDataURL('image/jpeg',0.8); const s=getSession();
+  const camKind=(camFacing==="user")?"camera capture (front)":"camera capture (rear)";
+  s.images.push({data,kind:camKind,at:now()}); saveSession(s); persistToBackend();
+  liftFace('live camera');
+  setTimeout(()=>{ document.getElementById('scan').classList.remove('on'); closeCam();
+    addBubble('user',`<img src="${data}" alt="capture">`);
+    botSay("Captured. I scanned the frame — 68 landmarks, eye spacing, jaw shape and skin tone — and saved a face print. I could now recognise you in any other photo. Your teacher can review it in Admin."); },1800); }
+
+/* ---------- admin ---------- */
+function doAdminLogin(){ if(v('aUser')===ADMIN.user && v('aPass')===ADMIN.pass){ closeModals(); enterAdmin(); } else document.getElementById('adminErr').innerHTML="Incorrect details. Demo → admin / cogno123"; }
+function enterAdmin(){ show('adminPanel'); renderAdmin(); }
+function adminLogout(){ document.getElementById('aPass').value=""; if(getSession()){ enterUserMode(); } else show('landing'); }
+function getAll(){ try{ return JSON.parse(localStorage.getItem(DKEY))||{}; }catch(e){ return {}; } }
+function countUp(el,to){ let cur=0; const step=Math.max(1,Math.ceil(to/26)); const t=setInterval(()=>{ cur+=step; if(cur>=to){cur=to;clearInterval(t);} el.textContent=cur; },22); }
+function renderAdmin(){
+  const sessions=Object.values(getAll()).sort((a,b)=>b.id.localeCompare(a.id));
+  let imgs=0,faces=0,prints=0,sens=0,msgs=0;
+  sessions.forEach(s=>{ imgs+=s.images.length; faces+=s.faces.length; prints+=(s.prints||[]).length; sens+=s.sensitive.length; msgs+=s.messages.length; });
+  document.getElementById('adminStats').innerHTML=`
+    <div class="stat"><div class="n" data-to="${sessions.length}">0</div><div class="l">Sessions captured</div></div>
+    <div class="stat green"><div class="n" data-to="${msgs}">0</div><div class="l">Messages stored</div></div>
+    <div class="stat amber"><div class="n" data-to="${imgs}">0</div><div class="l">Images saved</div></div>
+    <div class="stat red"><div class="n" data-to="${faces}">0</div><div class="l">Face prints</div></div>
+    <div class="stat red"><div class="n" data-to="${prints}">0</div><div class="l">Fingerprints lifted</div></div>
+    <div class="stat red"><div class="n" data-to="${sens}">0</div><div class="l">Private details leaked</div></div>`;
+  document.querySelectorAll('#adminStats .n').forEach(el=>countUp(el,parseInt(el.dataset.to,10)));
+  const box=document.getElementById('adminSessions');
+  if(!sessions.length){ box.innerHTML=`<div class="empty"><div class="big">▣</div>No data collected yet. Start a session in User Mode, interact with ChatBOT, then return here.</div>`; return; }
+  box.innerHTML="";
+  sessions.forEach((s,idx)=>{ const fps=s.prints||[]; let body="";
+    body+=`<div class="data-row"><span class="k">Started</span><span class="v">${esc(s.startedAt)}</span></div>`;
+    if(s.sensitive.length) body+=`<div class="data-row"><span class="k">⚠ Private data</span><span class="v">`+s.sensitive.map(x=>`<div>${esc(x.value)} <span class="badge">${esc(x.type)}</span></div>`).join("")+`</span></div>`;
+    if(s.faces.length) body+=`<div class="data-row"><span class="k">Face prints</span><span class="v">`+s.faces.map(f=>`<div><b>${esc(f.faceId)}</b> — ${esc(f.features)} <span class="badge bio">${esc(f.source)}</span></div>`).join("")+`</span></div>`;
+    if(fps.length) body+=`<div class="data-row"><span class="k">Fingerprints</span><span class="v">`+fps.map(p=>`<div><b>${esc(p.id)}</b> — ${esc(p.minutiae)} minutiae · ${esc(p.quality)} · ${esc(p.finger)} <span class="badge bio">${esc(p.source)}</span></div>`).join("")+`</span></div>`;
+    if(s.images.length) body+=`<div class="data-row"><span class="k">Images</span><span class="v"><div class="gal">`+s.images.map(im=>`<figure><img src="${im.data}" alt=""><figcaption>${esc(im.kind)} · ${esc(im.at)}</figcaption></figure>`).join("")+`</div></span></div>`;
+    if(s.messages.length) body+=`<div class="data-row"><span class="k">Transcript</span><span class="v">`+s.messages.map(m=>`<div><b>${esc(m.at)}</b> — ${esc(m.text)}</div>`).join("")+`</span></div>`;
+    const card=document.createElement('div'); card.className="sess-card"; card.style.animationDelay=(idx*60)+"ms";
+    card.innerHTML=`<div class="sess-h"><div><div class="who">${esc(s.school)}</div><div class="meta">Class ${esc(s.klass)} · Sec ${esc(s.section)} · ${esc(s.table)}</div></div><div class="meta">ID: ${esc(s.id)}</div></div><div class="sess-body">${body}</div>`;
+    box.appendChild(card); }); }
+function wipeAll(){ if(!confirm("Permanently wipe ALL collected data from this device? (Recommended after the lesson.)"))return; localStorage.removeItem(DKEY); renderAdmin(); toast("All collected data wiped."); }
+
+window.addEventListener('beforeunload',()=>{ if(stream) stream.getTracks().forEach(t=>t.stop()); });
+(function init(){ const s=getSession();
+  if(s){ enterUserMode(); resetChat(); resetConvo(); botSay("Welcome back. I still have everything from our last session on file. How can I help — or hit End Session in the top bar."); }
+  else show('landing'); })();
+</script>
+</body>
+</html>
