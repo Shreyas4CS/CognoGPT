@@ -298,14 +298,16 @@
   </main>
 </section>
 
-<section class="admin hidden" id="adminPanel">
-  <div class="admin-top">
-    <h1>Admin Dashboard <small>Everything ChatBOT collected across all sessions on this device</small></h1>
-    <div style="display:flex;gap:10px"><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
+<section class="hidden" id="adminPanel">
+  <div class="admin">
+    <div class="admin-top">
+      <h1>Admin Dashboard <small>Everything ChatBOT collected across all sessions on this device</small></h1>
+      <div style="display:flex;gap:10px"><button class="btn danger sm" onclick="wipeAll()">Wipe All Data</button><button class="btn ghost sm" onclick="adminLogout()">Logout</button></div>
+    </div>
+    <div class="alert"><span class="em">⚠</span><div>This is the lesson: none of this was meant to be seen by the students, yet here it all is — messages, photos, financial details, face scans and fingerprints, sitting in the assistant's memory for anyone with the login. Real AI tools can collect exactly like this.</div></div>
+    <div class="stats" id="adminStats"></div>
+    <div id="adminSessions"></div>
   </div>
-  <div class="alert"><span class="em">⚠</span><div>This is the lesson: none of this was meant to be seen by the students, yet here it all is — messages, photos, financial details, face scans and fingerprints, sitting in the assistant's memory for anyone with the login. Real AI tools can collect exactly like this.</div></div>
-  <div class="stats" id="adminStats"></div>
-  <div id="adminSessions"></div>
 </section>
 
 <footer>
